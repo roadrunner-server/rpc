@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/roadrunner-server/api/v2 v2.0.0-rc.2
 	github.com/roadrunner-server/endure v1.2.1
-	github.com/roadrunner-server/errors v1.1.0
+	github.com/roadrunner-server/errors v1.1.1
 	github.com/roadrunner-server/goridge/v3 v3.3.0
 	github.com/roadrunner-server/sdk/v2 v2.0.0-rc.1
 	go.uber.org/zap v1.20.0
