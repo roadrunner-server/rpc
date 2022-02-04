@@ -3,18 +3,18 @@ module github.com/roadrunner-server/rpc/v2
 go 1.17
 
 require (
-	github.com/roadrunner-server/api/v2 v2.8.0-rc.1
+	github.com/roadrunner-server/api/v2 v2.8.0-rc.3
 	github.com/roadrunner-server/endure v1.2.1
 	github.com/roadrunner-server/errors v1.1.1
 	github.com/roadrunner-server/goridge/v3 v3.3.1
-	github.com/roadrunner-server/sdk/v2 v2.8.0-rc.2
+	github.com/roadrunner-server/sdk/v2 v2.8.0-rc.3
 	go.uber.org/zap v1.20.0
 )
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/goccy/go-json v0.9.4 // indirect
-	github.com/roadrunner-server/tcplisten v1.1.0 // indirect
+	github.com/roadrunner-server/tcplisten v1.1.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
