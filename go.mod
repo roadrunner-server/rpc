@@ -12,7 +12,6 @@ require (
 )
 
 require (
-	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/roadrunner-server/tcplisten v1.1.2 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
