@@ -6,7 +6,7 @@ require (
 	github.com/roadrunner-server/api/v2 v2.18.0
 	github.com/roadrunner-server/endure v1.3.0
 	github.com/roadrunner-server/errors v1.1.2
-	github.com/roadrunner-server/goridge/v3 v3.4.2
+	github.com/roadrunner-server/goridge/v3 v3.4.4
 	github.com/roadrunner-server/sdk/v2 v2.16.0
 	go.uber.org/zap v1.21.0
 )
