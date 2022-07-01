@@ -21,12 +21,8 @@ github.com/roadrunner-server/endure v1.3.0 h1:lZNOE4EDcoibR2PE4xz6G8/ywQBq9HmMzC
 github.com/roadrunner-server/endure v1.3.0/go.mod h1:Yahi4Uoabla2o+0N+pbjWwIJnAigYWppGwbLU3D6cLc=
 github.com/roadrunner-server/errors v1.1.2 h1:+LPw9Akgg+8LAGM4wASMWLAoBIbyP+mhNfR+FBS2Slw=
 github.com/roadrunner-server/errors v1.1.2/go.mod h1:jVSh32nFtRMzKItYUM9W2CTLLpXAM8HseL2lUENPYtU=
-github.com/roadrunner-server/goridge/v3 v3.4.4 h1:cbS0hVuyPPNqtwh5EDk5RAwznTyhbSGOienR1/oxlSs=
-github.com/roadrunner-server/goridge/v3 v3.4.4/go.mod h1:xHWk/r5Wj3zcRcwD0F7mBhyeWu5w4KxOoIove1l5iKg=
 github.com/roadrunner-server/goridge/v3 v3.4.5 h1:g7K9kOmyAOQQ9TusDYksgyKBsKQrQVNc0CT1HKhaphg=
 github.com/roadrunner-server/goridge/v3 v3.4.5/go.mod h1:zGbUad2YyaaW9Vt9dqLBDcyrA45KlYoRh8jB7TUsStM=
-github.com/roadrunner-server/sdk/v2 v2.16.0 h1:ZVViuZm2N0NpkWGZVDxJaKX0/RLoZSgXqa9psNqv660=
-github.com/roadrunner-server/sdk/v2 v2.16.0/go.mod h1:Y9p0WbWOFKBKyognNr3cREP8v+Y+iE9P/J3uiz9zegI=
 github.com/roadrunner-server/sdk/v2 v2.17.3 h1:BkBDcdO+YhEvbmsbPtak5yg91FDW+GFoZr5UBrWOQJc=
 github.com/roadrunner-server/sdk/v2 v2.17.3/go.mod h1:n05/SPVQ9WFj4UJEruVbXrSUfo2hkGiO4HxMgvsAlWM=
 github.com/roadrunner-server/tcplisten v1.1.2 h1:GBjKlSEbA67UB2y83rFWsQKqMQGyalhTN9Q9HCIMBC0=
@@ -35,7 +31,7 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.5 h1:s5PTfem8p8EbKQOctVV53k6jCJt3UX4IEJzwh+C324Q=
+github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
 github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9znI5mJU=
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
