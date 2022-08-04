@@ -125,8 +125,8 @@ func (s *Plugin) Name() string {
 }
 
 // Collects all plugins which implement Name + RPCer interfaces
-func (s *Plugin) Collects() []interface{} {
-	return []interface{}{
+func (s *Plugin) Collects() []any {
+	return []any{
 		s.RegisterPlugin,
 	}
 }
@@ -138,13 +138,14 @@ func (s *Plugin) RegisterPlugin(name endure.Named, p api.RPCer) {
 
 // Register publishes in the server the set of methods of the
 // receiver value that satisfy the following conditions:
-//	- exported method of exported type
-//	- two arguments, both of exported type
-//	- the second argument is a pointer
-//	- one return value, of type error
+//   - exported method of exported type
+//   - two arguments, both of exported type
+//   - the second argument is a pointer
+//   - one return value, of type error
+//
 // It returns an error if the receiver is not an exported type or has
 // no suitable methods. It also logs the error using package log.
-func (s *Plugin) Register(name string, svc interface{}) error {
+func (s *Plugin) Register(name string, svc any) error {
 	if s.rpc == nil {
 		return errors.E("RPC service is not configured")
 	}
