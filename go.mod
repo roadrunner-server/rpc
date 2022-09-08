@@ -3,11 +3,11 @@ module github.com/roadrunner-server/rpc/v2
 go 1.19
 
 require (
-	github.com/roadrunner-server/api/v2 v2.21.2
+	github.com/roadrunner-server/api/v2 v2.22.2-rc.1
 	github.com/roadrunner-server/endure v1.4.5
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.5.2
-	github.com/roadrunner-server/sdk/v2 v2.18.5
+	github.com/roadrunner-server/sdk/v2 v2.19.0-rc.1
 	go.uber.org/zap v1.23.0
 )
 
