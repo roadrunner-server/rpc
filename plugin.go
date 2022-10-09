@@ -5,8 +5,6 @@ import (
 	"net/rpc"
 	"sync/atomic"
 
-	"github.com/roadrunner-server/api/v2/plugins/config"
-	api "github.com/roadrunner-server/api/v2/plugins/rpc"
 	endure "github.com/roadrunner-server/endure/pkg/container"
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v3/pkg/rpc"
@@ -22,13 +20,27 @@ type Plugin struct {
 	log *zap.Logger
 	rpc *rpc.Server
 	// set of the plugins, which are implement RPCer interface and can be plugged into the RR via RPC
-	plugins  map[string]api.RPCer
+	plugins  map[string]RPCer
 	listener net.Listener
 	closed   uint32
 }
 
+// RPCer declares the ability to create set of public RPC methods.
+type RPCer interface {
+	// RPC Provides methods for the given service.
+	RPC() any
+}
+
+type Configurer interface {
+	// UnmarshalKey takes a single key and unmarshal it into a Struct.
+	UnmarshalKey(name string, out any) error
+
+	// Has checks if config section exists.
+	Has(name string) bool
+}
+
 // Init rpc service. Must return true if service is enabled.
-func (s *Plugin) Init(cfg config.Configurer, log *zap.Logger) error {
+func (s *Plugin) Init(cfg Configurer, log *zap.Logger) error {
 	const op = errors.Op("rpc_plugin_init")
 
 	if !cfg.Has(PluginName) {
@@ -43,7 +55,7 @@ func (s *Plugin) Init(cfg config.Configurer, log *zap.Logger) error {
 	// Init defaults
 	s.cfg.InitDefaults()
 	// Init pluggable plugins map
-	s.plugins = make(map[string]api.RPCer, 1)
+	s.plugins = make(map[string]RPCer, 1)
 	// init logs
 	s.log = log
 
@@ -132,7 +144,7 @@ func (s *Plugin) Collects() []any {
 }
 
 // RegisterPlugin registers RPC service plugin.
-func (s *Plugin) RegisterPlugin(name endure.Named, p api.RPCer) {
+func (s *Plugin) RegisterPlugin(name endure.Named, p RPCer) {
 	s.plugins[name.Name()] = p
 }
 
