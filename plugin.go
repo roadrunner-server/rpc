@@ -5,6 +5,8 @@ import (
 	"net/rpc"
 	"sync/atomic"
 
+	"github.com/goccy/go-json"
+
 	endure "github.com/roadrunner-server/endure/pkg/container"
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v3/pkg/rpc"
@@ -23,6 +25,9 @@ type Plugin struct {
 	plugins  map[string]RPCer
 	listener net.Listener
 	closed   uint32
+
+	// whole configuration
+	wcfg []byte
 }
 
 // RPCer declares the ability to create set of public RPC methods.
@@ -32,6 +37,9 @@ type RPCer interface {
 }
 
 type Configurer interface {
+	// Unmarshal returns the whole configuration
+	Unmarshal(out any) error
+
 	// UnmarshalKey takes a single key and unmarshal it into a Struct.
 	UnmarshalKey(name string, out any) error
 
@@ -67,6 +75,18 @@ func (s *Plugin) Init(cfg Configurer, log *zap.Logger) error {
 	if err != nil {
 		return errors.E(op, err)
 	}
+
+	var WholeCfg any
+	err = cfg.Unmarshal(&WholeCfg)
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	s.wcfg, err = json.Marshal(WholeCfg)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -90,7 +110,17 @@ func (s *Plugin) Serve() chan error {
 		plugins = append(plugins, name)
 	}
 
+	/*
+		register own endpoint to return a configuration
+	*/
+
 	var err error
+	err = s.Register(PluginName, &API{cfg: s.wcfg})
+	if err != nil {
+		errCh <- errors.E(op, err)
+		return errCh
+	}
+
 	s.listener, err = s.cfg.Listener()
 	if err != nil {
 		errCh <- errors.E(op, err)
