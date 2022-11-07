@@ -22,9 +22,10 @@ type Plugin struct {
 	log *zap.Logger
 	rpc *rpc.Server
 	// set of the plugins, which are implement RPCer interface and can be plugged into the RR via RPC
-	plugins  map[string]RPCer
-	listener net.Listener
-	closed   uint32
+	plugins   map[string]RPCer
+	listener  net.Listener
+	closed    uint32
+	rrVersion string
 
 	// whole configuration
 	wcfg []byte
@@ -37,6 +38,9 @@ type RPCer interface {
 }
 
 type Configurer interface {
+	// RRVersion returns current RR version
+	RRVersion() string
+
 	// Unmarshal returns the whole configuration
 	Unmarshal(out any) error
 
@@ -87,6 +91,8 @@ func (s *Plugin) Init(cfg Configurer, log *zap.Logger) error {
 		return err
 	}
 
+	s.rrVersion = cfg.RRVersion()
+
 	return nil
 }
 
@@ -115,7 +121,7 @@ func (s *Plugin) Serve() chan error {
 	*/
 
 	var err error
-	err = s.Register(PluginName, &API{cfg: s.wcfg})
+	err = s.Register(PluginName, &API{cfg: s.wcfg, version: s.rrVersion})
 	if err != nil {
 		errCh <- errors.E(op, err)
 		return errCh
