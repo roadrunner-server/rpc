@@ -1,13 +1,14 @@
 package rpc
 
 import (
+	"context"
 	"net"
 	"net/rpc"
 	"sync/atomic"
 
 	"github.com/goccy/go-json"
+	"github.com/roadrunner-server/endure/v2/dep"
 
-	endure "github.com/roadrunner-server/endure/pkg/container"
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v3/pkg/rpc"
 	"go.uber.org/zap"
@@ -35,24 +36,27 @@ type Plugin struct {
 type RPCer interface {
 	// RPC Provides methods for the given service.
 	RPC() any
+	// Name of the plugin
+	Name() string
 }
 
 type Configurer interface {
 	// RRVersion returns current RR version
 	RRVersion() string
-
 	// Unmarshal returns the whole configuration
 	Unmarshal(out any) error
-
 	// UnmarshalKey takes a single key and unmarshal it into a Struct.
 	UnmarshalKey(name string, out any) error
-
 	// Has checks if config section exists.
 	Has(name string) bool
 }
 
+type Logger interface {
+	NamedLogger(name string) *zap.Logger
+}
+
 // Init rpc service. Must return true if service is enabled.
-func (s *Plugin) Init(cfg Configurer, log *zap.Logger) error {
+func (s *Plugin) Init(cfg Configurer, log Logger) error {
 	const op = errors.Op("rpc_plugin_init")
 
 	if !cfg.Has(PluginName) {
@@ -69,7 +73,7 @@ func (s *Plugin) Init(cfg Configurer, log *zap.Logger) error {
 	// Init pluggable plugins map
 	s.plugins = make(map[string]RPCer, 1)
 	// init logs
-	s.log = log
+	s.log = log.NamedLogger(PluginName)
 
 	// set up state
 	atomic.StoreUint32(&s.closed, 0)
@@ -156,7 +160,7 @@ func (s *Plugin) Serve() chan error {
 }
 
 // Stop stops the service.
-func (s *Plugin) Stop() error {
+func (s *Plugin) Stop(context.Context) error {
 	const op = errors.Op("rpc_plugin_stop")
 	// store closed state
 	atomic.StoreUint32(&s.closed, 1)
@@ -173,15 +177,13 @@ func (s *Plugin) Name() string {
 }
 
 // Collects all plugins which implement Name + RPCer interfaces
-func (s *Plugin) Collects() []any {
-	return []any{
-		s.RegisterPlugin,
+func (s *Plugin) Collects() []*dep.In {
+	return []*dep.In{
+		dep.Fits(func(p any) {
+			rpcer := p.(RPCer)
+			s.plugins[rpcer.Name()] = rpcer
+		}, (*RPCer)(nil)),
 	}
-}
-
-// RegisterPlugin registers RPC service plugin.
-func (s *Plugin) RegisterPlugin(name endure.Named, p RPCer) {
-	s.plugins[name.Name()] = p
 }
 
 // Register publishes in the server the set of methods of the
