@@ -1,2 +1,1 @@
-# rpc
-RRv2 RPC plugin
+# Docs: [link](https://roadrunner.dev/docs/plugins-rpc/2.x/en)
