@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/goccy/go-json v0.10.0
-	github.com/roadrunner-server/endure/v2 v2.0.0-beta.1
+	github.com/roadrunner-server/endure/v2 v2.0.0-rc.2
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.2
 	github.com/roadrunner-server/sdk/v3 v3.1.0
