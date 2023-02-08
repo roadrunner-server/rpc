@@ -171,6 +171,10 @@ func (s *Plugin) Stop(context.Context) error {
 	return nil
 }
 
+func (s *Plugin) Weight() uint {
+	return 100
+}
+
 // Name contains service name.
 func (s *Plugin) Name() string {
 	return PluginName
