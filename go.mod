@@ -13,7 +13,7 @@ require (
 
 require (
 	github.com/google/go-cmp v0.5.8 // indirect
-	github.com/roadrunner-server/tcplisten v1.2.1 // indirect
+	github.com/roadrunner-server/tcplisten v1.3.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
