@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/goccy/go-json v0.10.2
-	github.com/roadrunner-server/endure/v2 v2.3.0
+	github.com/roadrunner-server/endure/v2 v2.3.1
 	github.com/roadrunner-server/errors v1.2.0
 	github.com/roadrunner-server/goridge/v3 v3.6.3
 	github.com/roadrunner-server/sdk/v4 v4.3.1
-	go.uber.org/zap v1.24.0
+	go.uber.org/zap v1.25.0
 )
 
 require (
