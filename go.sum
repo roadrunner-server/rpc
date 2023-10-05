@@ -19,6 +19,8 @@ github.com/roadrunner-server/sdk/v4 v4.4.0 h1:WPrx5+5k43SGAsS/9EKYReU17jnONY9eRm
 github.com/roadrunner-server/sdk/v4 v4.4.0/go.mod h1:9TPfWYRm4jtlA//QAUBWAKC2c7Mt33FRAA2c9Be9yc8=
 github.com/roadrunner-server/sdk/v4 v4.5.0 h1:y6L9MQX2/zgjhOwTQWLPW8B1/9XUbTMKHHz0KVB0OGM=
 github.com/roadrunner-server/sdk/v4 v4.5.0/go.mod h1:Cx/SY/HJZrmybz901crdTeB3bLNy4+0rRN36eJ26iMQ=
+github.com/roadrunner-server/sdk/v4 v4.5.2 h1:AVTMR9XOcFDJYkfiMEVwUNLnoUXIlSTAX/0xDcroNec=
+github.com/roadrunner-server/sdk/v4 v4.5.2/go.mod h1:CUVXFWMqD6sf71Nn+5SEAXMFahhpA1d3RphBymi236s=
 github.com/roadrunner-server/tcplisten v1.4.0 h1:yWo09zktv/CSV6VywLfw4pwNcUchgTiIrW4uIICtO5M=
 github.com/roadrunner-server/tcplisten v1.4.0/go.mod h1:A6+VSnW2ETGnN/e/CMdP63ZXqQDaC0UDMU6QmyuB0yM=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
@@ -27,6 +29,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/vmihailenco/msgpack/v5 v5.3.5 h1:5gO0H1iULLWGhs2H5tbAHIZTV8/cYafcFOr9znI5mJU=
 github.com/vmihailenco/msgpack/v5 v5.3.5/go.mod h1:7xyJ9e+0+9SaZT0Wt1RGleJXzli6Q/V5KbhBonMG9jc=
+github.com/vmihailenco/msgpack/v5 v5.4.0 h1:hRM0digJwyR6vll33NNAwCFguy5JuBD6jxDmQP3l608=
+github.com/vmihailenco/msgpack/v5 v5.4.0/go.mod h1:GaZTsDaehaPpQVyxrf5mtQlH+pc21PIudVV/E3rRQok=
 github.com/vmihailenco/tagparser/v2 v2.0.0 h1:y09buUbR+b5aycVFQs/g70pqKVZNBmxwAhO7/IwNM9g=
 github.com/vmihailenco/tagparser/v2 v2.0.0/go.mod h1:Wri+At7QHww0WTrCBeu4J6bNtoV6mEfg5OIWRZA9qds=
 go.uber.org/goleak v1.2.0 h1:xqgm/S+aQvhWFTtR0XK3Jvg7z8kGV8P4X14IzwN3Eqk=
