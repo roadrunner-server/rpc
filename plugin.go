@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"net"
+	"net/http"
 	"net/rpc"
 	"sync/atomic"
 
@@ -19,9 +20,10 @@ const PluginName = "rpc"
 
 // Plugin is RPC service.
 type Plugin struct {
-	cfg Config
-	log *zap.Logger
-	rpc *rpc.Server
+	cfg     Config
+	log     *zap.Logger
+	rpc     *rpc.Server
+	handler *handler
 	// set of the plugins, which are implement RPCer interface and can be plugged into the RR via RPC
 	plugins   map[string]RPCer
 	listener  net.Listener
@@ -96,6 +98,7 @@ func (s *Plugin) Init(cfg Configurer, log Logger) error {
 	}
 
 	s.rrVersion = cfg.RRVersion()
+	s.handler = newHandler()
 
 	return nil
 }
@@ -155,6 +158,9 @@ func (s *Plugin) Serve() chan error {
 			go s.rpc.ServeCodec(goridgeRpc.NewCodec(conn))
 		}
 	}()
+
+	mux := http.NewServeMux()
+	mux.Handle("/", s.handler.handleHttp())
 
 	return errCh
 }

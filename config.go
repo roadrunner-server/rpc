@@ -10,7 +10,7 @@ import (
 
 // Config defines RPC service config.
 type Config struct {
-	// Listen address string
+	// Listen: address string
 	Listen string `mapstructure:"listen"`
 }
 
