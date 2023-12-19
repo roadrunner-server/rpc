@@ -5,12 +5,12 @@ go 1.21
 toolchain go1.21.5
 
 require (
-	github.com/roadrunner-server/config/v4 v4.6.3
+	github.com/roadrunner-server/config/v4 v4.6.4
 	github.com/roadrunner-server/endure/v2 v2.4.3
 	github.com/roadrunner-server/errors v1.3.0
 	github.com/roadrunner-server/goridge/v3 v3.8.1
-	github.com/roadrunner-server/logger/v4 v4.2.10
-	github.com/roadrunner-server/rpc/v4 v4.2.11
+	github.com/roadrunner-server/logger/v4 v4.2.11
+	github.com/roadrunner-server/rpc/v4 v4.2.12
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -37,13 +37,13 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.17.0 // indirect
+	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb // indirect
+	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
