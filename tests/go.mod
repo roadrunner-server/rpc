@@ -2,12 +2,12 @@ module tests
 
 go 1.21
 
-toolchain go1.22rc1
+toolchain go1.22rc2
 
 require (
 	github.com/roadrunner-server/config/v4 v4.6.6
 	github.com/roadrunner-server/endure/v2 v2.4.3
-	github.com/roadrunner-server/errors v1.3.0
+	github.com/roadrunner-server/errors v1.4.0
 	github.com/roadrunner-server/goridge/v3 v3.8.1
 	github.com/roadrunner-server/logger/v4 v4.2.13
 	github.com/roadrunner-server/rpc/v4 v4.2.14
