@@ -1,8 +1,6 @@
 module github.com/roadrunner-server/rpc/v4
 
-go 1.22
-
-toolchain go1.22.0
+go 1.22.0
 
 require (
 	github.com/goccy/go-json v0.10.2
