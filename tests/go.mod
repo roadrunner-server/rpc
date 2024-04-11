@@ -6,7 +6,7 @@ require (
 	github.com/roadrunner-server/config/v4 v4.6.9
 	github.com/roadrunner-server/endure/v2 v2.4.4
 	github.com/roadrunner-server/errors v1.4.0
-	github.com/roadrunner-server/goridge/v3 v3.8.1
+	github.com/roadrunner-server/goridge/v3 v3.8.2
 	github.com/roadrunner-server/logger/v4 v4.2.16
 	github.com/roadrunner-server/rpc/v4 v4.2.17
 	github.com/stretchr/testify v1.9.0
