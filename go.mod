@@ -3,7 +3,7 @@ module github.com/roadrunner-server/rpc/v4
 go 1.22.3
 
 require (
-	github.com/goccy/go-json v0.10.2
+	github.com/goccy/go-json v0.10.3
 	github.com/roadrunner-server/endure/v2 v2.4.4
 	github.com/roadrunner-server/errors v1.4.0
 	github.com/roadrunner-server/goridge/v3 v3.8.2
