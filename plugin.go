@@ -17,7 +17,7 @@ import (
 // PluginName contains default plugin name.
 const PluginName = "rpc"
 
-// Plugin is RPC service.
+// Plugin is an RPC service.
 type Plugin struct {
 	cfg Config
 	log *zap.Logger

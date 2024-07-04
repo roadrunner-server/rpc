@@ -9,11 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/roadrunner-server/config/v4"
+	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/logger/v4"
-	"github.com/roadrunner-server/rpc/v4"
+	"github.com/roadrunner-server/logger/v5"
+	"github.com/roadrunner-server/rpc/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,8 +31,8 @@ func TestRpcInit(t *testing.T) {
 	}
 
 	v := &config.Plugin{
-		Path:   "configs/.rr.yaml",
-		Prefix: "rr",
+		Version: "v2024.2.0",
+		Path:    "configs/.rr.yaml",
 	}
 
 	err = cont.Register(v)
