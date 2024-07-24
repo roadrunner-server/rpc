@@ -7,7 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/goccy/go-json v0.10.3
 	github.com/roadrunner-server/endure/v2 v2.4.6
-	github.com/roadrunner-server/errors v1.4.0
+	github.com/roadrunner-server/errors v1.4.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/tcplisten v1.5.1
 	go.uber.org/zap v1.27.0
