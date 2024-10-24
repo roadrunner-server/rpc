@@ -1,0 +1,19 @@
+{
+  "$id": "https://raw.githubusercontent.com/roadrunner-server/rpc/refs/heads/master/schema.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "description": "All the valid configuration parameters for the RPC plugin for RoadRunner.",
+  "type": "object",
+  "title": "roadrunner-rpc",
+  "additionalProperties": false,
+  "properties": {
+    "listen": {
+      "description": "The address and port for the RPC server to bind to. Should contain protocol definition (i.e. `tcp://` or `unix://`).",
+      "type": "string",
+      "default": "tcp://127.0.0.1:6001",
+      "minLength": 1,
+      "examples": [
+        "tcp://127.0.0.1:6001"
+      ]
+    }
+  }
+}
