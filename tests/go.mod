@@ -11,7 +11,7 @@ require (
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/logger/v5 v5.0.4
 	github.com/roadrunner-server/rpc/v5 v5.0.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 )
 
 replace github.com/roadrunner-server/rpc/v5 => ../
