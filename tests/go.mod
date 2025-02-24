@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.0
 
 require (
-	github.com/roadrunner-server/config/v5 v5.1.4
+	github.com/roadrunner-server/config/v5 v5.1.5
 	github.com/roadrunner-server/endure/v2 v2.6.1
 	github.com/roadrunner-server/errors v1.4.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
@@ -29,7 +29,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/roadrunner-server/tcplisten v1.5.1 // indirect
+	github.com/roadrunner-server/tcplisten v1.5.2 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
