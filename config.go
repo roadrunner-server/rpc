@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"context"
 	"errors"
 	"net"
 	"strings"
@@ -41,6 +42,6 @@ func (c *Config) Dialer() (net.Conn, error) {
 	if len(dsn) != 2 {
 		return nil, errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
 	}
-
-	return net.Dial(dsn[0], dsn[1])
+	var d net.Dialer
+	return d.DialContext(context.Background(), dsn[0], dsn[1])
 }
