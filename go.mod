@@ -10,7 +10,7 @@ require (
 	github.com/roadrunner-server/errors v1.4.1
 	github.com/roadrunner-server/goridge/v3 v3.8.3
 	github.com/roadrunner-server/tcplisten v1.5.2
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 )
 
 exclude (
