@@ -1,4 +1,4 @@
-package rpc
+package rpc //nolint: revive
 
 type API struct {
 	cfg     []byte
