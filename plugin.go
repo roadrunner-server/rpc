@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"net/rpc"
 	"sync/atomic"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
-	"go.uber.org/zap"
 )
 
 // PluginName contains default plugin name.
@@ -20,7 +20,7 @@ const PluginName = "rpc"
 // Plugin is an RPC service.
 type Plugin struct {
 	cfg Config
-	log *zap.Logger
+	log *slog.Logger
 	rpc *rpc.Server
 	// set of the plugins, which are implement RPCer interface and can be plugged into the RR via RPC
 	plugins   map[string]RPCer
@@ -52,7 +52,7 @@ type Configurer interface {
 }
 
 type Logger interface {
-	NamedLogger(name string) *zap.Logger
+	NamedLogger(name string) *slog.Logger
 }
 
 // Init rpc service. Must return true if service is enabled.
@@ -137,7 +137,7 @@ func (s *Plugin) Serve() chan error {
 		return errCh
 	}
 
-	s.log.Debug("plugin was started", zap.String("address", s.cfg.Listen), zap.Strings("list of the plugins with RPC methods:", plugins))
+	s.log.Debug("plugin was started", "address", s.cfg.Listen, "list of the plugins with RPC methods:", plugins)
 
 	go func() {
 		for {
@@ -148,7 +148,7 @@ func (s *Plugin) Serve() chan error {
 					return
 				}
 
-				s.log.Error("failed to accept the connection", zap.Error(errA))
+				s.log.Error("failed to accept the connection", "error", errA)
 				continue
 			}
 
