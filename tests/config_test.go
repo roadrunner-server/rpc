@@ -3,7 +3,7 @@ package rpc
 import (
 	"testing"
 
-	"github.com/roadrunner-server/rpc/v5"
+	"github.com/roadrunner-server/rpc/v6"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -10,7 +10,7 @@ import (
 	"github.com/roadrunner-server/endure/v2/dep"
 
 	"github.com/roadrunner-server/errors"
-	goridgeRpc "github.com/roadrunner-server/goridge/v3/pkg/rpc"
+	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 	"go.uber.org/zap"
 )
 

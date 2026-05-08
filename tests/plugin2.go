@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/roadrunner-server/errors"
-	goridgeRpc "github.com/roadrunner-server/goridge/v3/pkg/rpc"
+	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 )
 
 // Plugin2 makes a call to the plugin1 via RPC
