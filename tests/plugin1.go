@@ -2,8 +2,13 @@ package rpc
 
 import (
 	"context"
-	"fmt"
+	"net/http"
+
+	"connectrpc.com/connect"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
+
+const plugin1HelloPath = "/rpc_test.plugin1/Hello"
 
 type Plugin1 struct {
 	config Configurer
@@ -22,8 +27,7 @@ func (p1 *Plugin1) Init(cfg Configurer) error {
 }
 
 func (p1 *Plugin1) Serve() chan error {
-	errCh := make(chan error, 1)
-	return errCh
+	return make(chan error, 1)
 }
 
 func (p1 *Plugin1) Stop(context.Context) error {
@@ -34,15 +38,11 @@ func (p1 *Plugin1) Name() string {
 	return "rpc_test.plugin1"
 }
 
-func (p1 *Plugin1) RPC() any {
-	return &PluginRPC{srv: p1}
-}
-
-type PluginRPC struct {
-	srv *Plugin1
-}
-
-func (r *PluginRPC) Hello(in string, out *string) error {
-	*out = fmt.Sprintf("Hello, username: %s", in)
-	return nil
+func (p1 *Plugin1) RPC() (string, http.Handler) {
+	return plugin1HelloPath, connect.NewUnaryHandler(
+		plugin1HelloPath,
+		func(_ context.Context, req *connect.Request[wrapperspb.StringValue]) (*connect.Response[wrapperspb.StringValue], error) {
+			return connect.NewResponse(&wrapperspb.StringValue{Value: "Hello, username: " + req.Msg.GetValue()}), nil
+		},
+	)
 }
