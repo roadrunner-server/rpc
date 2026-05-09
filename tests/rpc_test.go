@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"log/slog"
+	"net"
 	"os"
 	"os/signal"
 	"sort"
@@ -115,8 +116,15 @@ func TestRpcReflection(t *testing.T) {
 
 	defer func() { _ = cont.Stop() }()
 
-	// give the http listener a moment to come up
-	time.Sleep(500 * time.Millisecond)
+	// poll the listener until it accepts connections (avoids fixed-sleep flakes)
+	require.Eventually(t, func() bool {
+		c, err := net.DialTimeout("tcp", "127.0.0.1:6001", 100*time.Millisecond)
+		if err != nil {
+			return false
+		}
+		_ = c.Close()
+		return true
+	}, 5*time.Second, 50*time.Millisecond, "http listener never came up")
 
 	conn, err := grpc.NewClient("127.0.0.1:6001", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)

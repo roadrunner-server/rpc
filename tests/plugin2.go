@@ -27,7 +27,7 @@ func (p2 *Plugin2) Serve() chan error {
 
 		client := connect.NewClient[wrapperspb.StringValue, wrapperspb.StringValue](
 			http.DefaultClient,
-			"http://127.0.0.1:6001/rpc_test.plugin1/Hello",
+			"http://127.0.0.1:6001"+plugin1HelloPath,
 		)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

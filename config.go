@@ -22,7 +22,9 @@ type TLS struct {
 type Config struct {
 	// Listen - address string (tcp://host:port or unix://file.sock).
 	Listen string `mapstructure:"listen"`
-	// RequestTimeout caps a single RPC request lifetime.
+	// RequestTimeout caps the read phases of an RPC request (header + body
+	// reads). Handler execution itself is bounded per-call by the request's
+	// context deadline. Streaming RPCs are not bounded by this value.
 	RequestTimeout time.Duration `mapstructure:"request_timeout"`
 	// TLS material; when set, both Cert and Key are required.
 	TLS *TLS `mapstructure:"tls"`
@@ -42,6 +44,9 @@ func (c *Config) InitDefaults() {
 func (c *Config) Valid() error {
 	if dsn := strings.Split(c.Listen, "://"); len(dsn) != 2 {
 		return errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
+	}
+	if c.RequestTimeout < 0 {
+		return errors.New("rpc request_timeout must be non-negative")
 	}
 	if c.TLS != nil {
 		if c.TLS.Cert == "" || c.TLS.Key == "" {

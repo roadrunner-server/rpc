@@ -117,6 +117,11 @@ func (s *Plugin) Serve() chan error {
 			s.log.Warn("plugin returned empty rpc handler", "plugin", name)
 			continue
 		}
+		// http.ServeMux.Handle panics on patterns missing a leading slash.
+		if !strings.HasPrefix(path, "/") {
+			s.log.Warn("plugin rpc handler path must start with '/'", "plugin", name, "path", path)
+			continue
+		}
 		mux.Handle(path, handler)
 		// derive the gRPC service name from the mount path
 		// (`/<service>/<Method>` or `/<service>/`)
@@ -151,12 +156,14 @@ func (s *Plugin) Serve() chan error {
 		Handler:           mux,
 		Protocols:         protocols,
 		ReadHeaderTimeout: s.cfg.RequestTimeout,
+		ReadTimeout:       s.cfg.RequestTimeout,
 	}
 
 	useTLS := s.cfg.TLS != nil
 	if useTLS {
 		cert, err := tls.LoadX509KeyPair(s.cfg.TLS.Cert, s.cfg.TLS.Key)
 		if err != nil {
+			_ = s.listener.Close()
 			errCh <- errors.E(op, err)
 			return errCh
 		}
