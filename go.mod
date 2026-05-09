@@ -12,6 +12,8 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
+require connectrpc.com/grpcreflect v1.3.0
+
 exclude (
 	github.com/spf13/viper v1.18.0
 	github.com/spf13/viper v1.18.1

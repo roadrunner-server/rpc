@@ -8,8 +8,10 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 	"sync/atomic"
 
+	"connectrpc.com/grpcreflect"
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
 )
@@ -108,7 +110,7 @@ func (s *Plugin) Serve() chan error {
 	s.plugins[PluginName] = s
 
 	mux := http.NewServeMux()
-	mounted := make([]string, 0, len(s.plugins))
+	services := make([]string, 0, len(s.plugins))
 	for name, rpcer := range s.plugins {
 		path, handler := rpcer.RPC()
 		if path == "" || handler == nil {
@@ -116,7 +118,22 @@ func (s *Plugin) Serve() chan error {
 			continue
 		}
 		mux.Handle(path, handler)
-		mounted = append(mounted, name)
+		// derive the gRPC service name from the mount path
+		// (`/<service>/<Method>` or `/<service>/`)
+		svc := strings.TrimPrefix(path, "/")
+		if i := strings.Index(svc, "/"); i >= 0 {
+			svc = svc[:i]
+		}
+		services = append(services, svc)
+	}
+
+	// gRPC server reflection so operators can list services with grpcurl
+	if len(services) > 0 {
+		reflector := grpcreflect.NewStaticReflector(services...)
+		rpath, rhandler := grpcreflect.NewHandlerV1(reflector)
+		mux.Handle(rpath, rhandler)
+		rpath, rhandler = grpcreflect.NewHandlerV1Alpha(reflector)
+		mux.Handle(rpath, rhandler)
 	}
 
 	listener, err := s.cfg.Listener()
@@ -157,7 +174,7 @@ func (s *Plugin) Serve() chan error {
 	s.log.Debug("plugin was started",
 		"address", s.cfg.Listen,
 		"tls", useTLS,
-		"plugins", mounted,
+		"services", services,
 	)
 
 	go func() {
