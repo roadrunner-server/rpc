@@ -106,11 +106,10 @@ func (s *Plugin) Serve() chan error {
 	// register the rpc plugin's own API surface alongside discovered plugins
 	s.plugins[PluginName] = s
 
-	mux, routes := build(s.plugins, s.log)
+	mux, routes, services := build(s.plugins, s.log)
 
 	// gRPC server reflection so operators can list services with grpcurl
-	if len(routes) > 0 {
-		services := uniqueServices(routes)
+	if len(services) > 0 {
 		reflector := grpcreflect.NewStaticReflector(services...)
 		path, handler := grpcreflect.NewHandlerV1(reflector)
 		mux.Handle(path, handler)
@@ -217,38 +216,6 @@ func pluginNames(plugins map[string]RPCer) []string {
 	out := make([]string, 0, len(plugins))
 	for name := range plugins {
 		out = append(out, name)
-	}
-	return out
-}
-
-// uniqueServices extracts the service segment of each procedure path
-// (`/<service>/<Method>`) and returns the deduplicated list, preserving
-// first-seen order so log output stays stable.
-func uniqueServices(routes []string) []string {
-	seen := make(map[string]struct{}, len(routes))
-	out := make([]string, 0, len(routes))
-	for _, r := range routes {
-		// r is "/<service>/<Method>"; find the two slashes.
-		if len(r) < 2 || r[0] != '/' {
-			continue
-		}
-		rest := r[1:]
-		idx := -1
-		for i := 0; i < len(rest); i++ {
-			if rest[i] == '/' {
-				idx = i
-				break
-			}
-		}
-		if idx < 0 {
-			continue
-		}
-		svc := rest[:idx]
-		if _, ok := seen[svc]; ok {
-			continue
-		}
-		seen[svc] = struct{}{}
-		out = append(out, svc)
 	}
 	return out
 }

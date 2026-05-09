@@ -19,10 +19,12 @@ import (
 //	func(*A, *B) error  where A and B implement proto.Message.
 //
 // Methods that don't match are skipped with a warning. Returns the configured
-// mux and the list of registered procedure paths.
-func build(plugins map[string]RPCer, log *slog.Logger) (*http.ServeMux, []string) {
+// mux, the list of registered procedure paths, and the list of services
+// (plugin names) that contributed at least one route.
+func build(plugins map[string]RPCer, log *slog.Logger) (*http.ServeMux, []string, []string) {
 	mux := http.NewServeMux()
 	routes := make([]string, 0)
+	services := make([]string, 0, len(plugins))
 
 	for name, rpcer := range plugins {
 		if rpcer == nil {
@@ -34,10 +36,14 @@ func build(plugins map[string]RPCer, log *slog.Logger) (*http.ServeMux, []string
 			continue
 		}
 
+		before := len(routes)
 		registerService(mux, &routes, name, svc, log)
+		if len(routes) > before {
+			services = append(services, name)
+		}
 	}
 
-	return mux, routes
+	return mux, routes, services
 }
 
 func registerService(mux *http.ServeMux, routes *[]string, pluginName string, svc any, log *slog.Logger) {
