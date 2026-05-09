@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/roadrunner-server/config/v5"
+	"github.com/roadrunner-server/config/v6"
 	"github.com/roadrunner-server/endure/v2"
 	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/logger/v5"
+	"github.com/roadrunner-server/logger/v6"
 	"github.com/roadrunner-server/rpc/v6"
 	"github.com/stretchr/testify/assert"
 )

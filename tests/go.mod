@@ -5,11 +5,11 @@ go 1.26
 toolchain go1.26.0
 
 require (
-	github.com/roadrunner-server/config/v5 v5.1.9
+	github.com/roadrunner-server/config/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.5.0
 	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.1
-	github.com/roadrunner-server/logger/v5 v5.1.9
+	github.com/roadrunner-server/logger/v6 v6.0.0-beta.3
 	github.com/roadrunner-server/rpc/v6 v6.0.0
 	github.com/stretchr/testify v1.11.1
 )
@@ -39,6 +39,5 @@ require (
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
