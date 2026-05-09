@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strings"
 	"sync/atomic"
 
 	"connectrpc.com/grpcreflect"
@@ -33,12 +34,15 @@ type Plugin struct {
 	wcfg []byte
 }
 
-// RPCer declares the ability to create set of public RPC methods.
+// RPCer declares the ability to expose a Connect-RPC service. Implementations
+// typically delegate to a generated connect.NewXxxServiceHandler(impl).
 type RPCer interface {
-	// RPC Provides methods for the given service.
-	RPC() any
-	// Name of the plugin
+	// Name of the plugin (used as a discovery key and for the gRPC reflection
+	// service token).
 	Name() string
+	// RPC returns the URL prefix and HTTP handler this plugin wants mounted on
+	// the rpc server's mux.
+	RPC() (string, http.Handler)
 }
 
 type Configurer interface {
@@ -106,7 +110,17 @@ func (s *Plugin) Serve() chan error {
 	// register the rpc plugin's own API surface alongside discovered plugins
 	s.plugins[PluginName] = s
 
-	mux, routes, services := build(s.plugins, s.log)
+	mux := http.NewServeMux()
+	services := make([]string, 0, len(s.plugins))
+	for name, rpcer := range s.plugins {
+		path, handler := rpcer.RPC()
+		if path == "" || handler == nil {
+			s.log.Warn("plugin returned empty rpc handler", "plugin", name)
+			continue
+		}
+		mux.Handle(path, handler)
+		services = append(services, serviceName(path))
+	}
 
 	// gRPC server reflection so operators can list services with grpcurl
 	if len(services) > 0 {
@@ -155,8 +169,7 @@ func (s *Plugin) Serve() chan error {
 	s.log.Debug("plugin was started",
 		"address", s.cfg.Listen,
 		"tls", useTLS,
-		"plugins", pluginNames(s.plugins),
-		"routes", routes,
+		"services", services,
 	)
 
 	go func() {
@@ -196,10 +209,10 @@ func (s *Plugin) Name() string {
 	return PluginName
 }
 
-// RPC exposes the rpc plugin's own API surface so the bridge serves Config/Version
-// alongside collected plugins.
-func (s *Plugin) RPC() any {
-	return &API{cfg: s.wcfg, version: s.rrVersion}
+// RPC exposes the rpc plugin's own API surface (Config, Version) so it is
+// served alongside collected plugins.
+func (s *Plugin) RPC() (string, http.Handler) {
+	return newSelfHandlers(s.wcfg, s.rrVersion)
 }
 
 // Collects all plugins which implement Name + RPCer interfaces
@@ -212,10 +225,14 @@ func (s *Plugin) Collects() []*dep.In {
 	}
 }
 
-func pluginNames(plugins map[string]RPCer) []string {
-	out := make([]string, 0, len(plugins))
-	for name := range plugins {
-		out = append(out, name)
+// serviceName extracts the gRPC service token from a Connect mount path.
+// Connect handlers (and generated NewXxxServiceHandler outputs) mount at
+// "/<package>.<Service>/" or "/<package>.<Service>/<Method>"; the token is the
+// segment between the first two slashes.
+func serviceName(path string) string {
+	trimmed := strings.TrimPrefix(path, "/")
+	if i := strings.Index(trimmed, "/"); i >= 0 {
+		return trimmed[:i]
 	}
-	return out
+	return trimmed
 }
