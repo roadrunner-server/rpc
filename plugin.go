@@ -2,14 +2,13 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
 	"log/slog"
 	"net"
 	"net/rpc"
 	"sync/atomic"
 
-	"github.com/goccy/go-json"
 	"github.com/roadrunner-server/endure/v2/dep"
-
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 )
