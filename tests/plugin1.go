@@ -2,7 +2,8 @@ package rpc
 
 import (
 	"context"
-	"fmt"
+
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type Plugin1 struct {
@@ -42,7 +43,7 @@ type PluginRPC struct {
 	srv *Plugin1
 }
 
-func (r *PluginRPC) Hello(in string, out *string) error {
-	*out = fmt.Sprintf("Hello, username: %s", in)
+func (r *PluginRPC) Hello(in *wrapperspb.StringValue, out *wrapperspb.StringValue) error {
+	out.Value = "Hello, username: " + in.GetValue()
 	return nil
 }
