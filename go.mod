@@ -6,7 +6,6 @@ toolchain go1.26.0
 
 require (
 	connectrpc.com/connect v1.19.2
-	connectrpc.com/grpcreflect v1.3.0
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.5.0
 	github.com/roadrunner-server/tcplisten v1.5.2

@@ -8,10 +8,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"strings"
 	"sync/atomic"
 
-	"connectrpc.com/grpcreflect"
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
 )
@@ -37,8 +35,7 @@ type Plugin struct {
 // RPCer declares the ability to expose a Connect-RPC service. Implementations
 // typically delegate to a generated connect.NewXxxServiceHandler(impl).
 type RPCer interface {
-	// Name of the plugin (used as a discovery key and for the gRPC reflection
-	// service token).
+	// Name of the plugin.
 	Name() string
 	// RPC returns the URL prefix and HTTP handler this plugin wants mounted on
 	// the rpc server's mux.
@@ -111,7 +108,7 @@ func (s *Plugin) Serve() chan error {
 	s.plugins[PluginName] = s
 
 	mux := http.NewServeMux()
-	services := make([]string, 0, len(s.plugins))
+	mounted := make([]string, 0, len(s.plugins))
 	for name, rpcer := range s.plugins {
 		path, handler := rpcer.RPC()
 		if path == "" || handler == nil {
@@ -119,16 +116,7 @@ func (s *Plugin) Serve() chan error {
 			continue
 		}
 		mux.Handle(path, handler)
-		services = append(services, serviceName(path))
-	}
-
-	// gRPC server reflection so operators can list services with grpcurl
-	if len(services) > 0 {
-		reflector := grpcreflect.NewStaticReflector(services...)
-		path, handler := grpcreflect.NewHandlerV1(reflector)
-		mux.Handle(path, handler)
-		path, handler = grpcreflect.NewHandlerV1Alpha(reflector)
-		mux.Handle(path, handler)
+		mounted = append(mounted, name)
 	}
 
 	listener, err := s.cfg.Listener()
@@ -169,7 +157,7 @@ func (s *Plugin) Serve() chan error {
 	s.log.Debug("plugin was started",
 		"address", s.cfg.Listen,
 		"tls", useTLS,
-		"services", services,
+		"plugins", mounted,
 	)
 
 	go func() {
@@ -223,16 +211,4 @@ func (s *Plugin) Collects() []*dep.In {
 			s.plugins[rpcer.Name()] = rpcer
 		}, (*RPCer)(nil)),
 	}
-}
-
-// serviceName extracts the gRPC service token from a Connect mount path.
-// Connect handlers (and generated NewXxxServiceHandler outputs) mount at
-// "/<package>.<Service>/" or "/<package>.<Service>/<Method>"; the token is the
-// segment between the first two slashes.
-func serviceName(path string) string {
-	trimmed := strings.TrimPrefix(path, "/")
-	if i := strings.Index(trimmed, "/"); i >= 0 {
-		return trimmed[:i]
-	}
-	return trimmed
 }
