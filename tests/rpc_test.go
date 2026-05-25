@@ -71,12 +71,10 @@ func TestRpcInit(t *testing.T) {
 
 	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
 	tt := time.NewTimer(time.Second * 3)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer tt.Stop()
 		for {
 			select {
@@ -94,7 +92,7 @@ func TestRpcInit(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 }
@@ -209,10 +207,8 @@ func TestRpcDisabled(t *testing.T) {
 	tt := time.NewTimer(time.Second * 20)
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		defer tt.Stop()
 		for {
 			select {
@@ -235,7 +231,7 @@ func TestRpcDisabled(t *testing.T) {
 				return
 			}
 		}
-	}()
+	})
 
 	wg.Wait()
 }
