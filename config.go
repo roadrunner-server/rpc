@@ -40,10 +40,20 @@ func (c *Config) InitDefaults() {
 	}
 }
 
+// parseDSN splits a "scheme://address" DSN and returns the two parts.
+// Returns an error when the DSN does not contain "://".
+func parseDSN(dsn string) (scheme, addr string, err error) {
+	scheme, addr, ok := strings.Cut(dsn, "://")
+	if !ok {
+		return "", "", errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
+	}
+	return scheme, addr, nil
+}
+
 // Valid returns nil if config is valid.
 func (c *Config) Valid() error {
-	if dsn := strings.Split(c.Listen, "://"); len(dsn) != 2 {
-		return errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
+	if _, _, err := parseDSN(c.Listen); err != nil {
+		return err
 	}
 	if c.RequestTimeout < 0 {
 		return errors.New("rpc request_timeout must be non-negative")
@@ -63,10 +73,10 @@ func (c *Config) Listener() (net.Listener, error) {
 
 // Dialer creates rpc socket Dialer.
 func (c *Config) Dialer() (net.Conn, error) {
-	dsn := strings.Split(c.Listen, "://")
-	if len(dsn) != 2 {
-		return nil, errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
+	scheme, addr, err := parseDSN(c.Listen)
+	if err != nil {
+		return nil, err
 	}
 	var d net.Dialer
-	return d.DialContext(context.Background(), dsn[0], dsn[1])
+	return d.DialContext(context.Background(), scheme, addr)
 }
