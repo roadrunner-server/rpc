@@ -41,10 +41,10 @@ func (c *Config) InitDefaults() {
 }
 
 // parseDSN splits a "scheme://address" DSN and returns the two parts.
-// Returns an error when the DSN does not contain "://".
+// Returns an error unless the DSN contains exactly one "://" separator.
 func parseDSN(dsn string) (scheme, addr string, err error) {
 	scheme, addr, ok := strings.Cut(dsn, "://")
-	if !ok {
+	if !ok || strings.Contains(addr, "://") {
 		return "", "", errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
 	}
 	return scheme, addr, nil

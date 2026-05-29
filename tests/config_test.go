@@ -156,6 +156,18 @@ func Test_Config_DialerErrorMethod(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_Config_MultipleSeparators(t *testing.T) {
+	// A DSN with more than one "://" must be rejected by both Valid and Dialer.
+	cfg := &rpc.Config{Listen: "tcp://host://6001"}
+
+	assert.Error(t, cfg.Valid())
+
+	conn, err := cfg.Dialer()
+	assert.Nil(t, conn)
+	assert.Error(t, err)
+	assert.Equal(t, "invalid socket DSN (tcp://:6001, unix://file.sock)", err.Error())
+}
+
 func Test_Config_Defaults(t *testing.T) {
 	c := &rpc.Config{}
 	c.InitDefaults()
