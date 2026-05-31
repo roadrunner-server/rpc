@@ -85,13 +85,13 @@ func (s *Plugin) Init(cfg Configurer, log Logger) error {
 		return errors.E(op, err)
 	}
 
-	var WholeCfg any
-	err = cfg.Unmarshal(&WholeCfg)
+	var wholeCfg any
+	err = cfg.Unmarshal(&wholeCfg)
 	if err != nil {
 		return errors.E(op, err)
 	}
 
-	s.wcfg, err = json.Marshal(WholeCfg)
+	s.wcfg, err = json.Marshal(wholeCfg)
 	if err != nil {
 		return err
 	}
@@ -125,10 +125,7 @@ func (s *Plugin) Serve() chan error {
 		mux.Handle(path, handler)
 		// derive the gRPC service name from the mount path
 		// (`/<service>/<Method>` or `/<service>/`)
-		svc := strings.TrimPrefix(path, "/")
-		if i := strings.Index(svc, "/"); i >= 0 {
-			svc = svc[:i]
-		}
+		svc, _, _ := strings.Cut(strings.TrimPrefix(path, "/"), "/")
 		services = append(services, svc)
 	}
 
