@@ -40,19 +40,25 @@ func (c *Config) InitDefaults() {
 	}
 }
 
-// parseDSN splits a "scheme://address" DSN and returns the two parts.
-// Returns an error unless the DSN contains exactly one "://" separator.
-func parseDSN(dsn string) (scheme, addr string, err error) {
-	scheme, addr, ok := strings.Cut(dsn, "://")
+// dsn is a parsed "scheme://address" RPC listen string.
+type dsn struct {
+	scheme string
+	addr   string
+}
+
+// parseDSN splits a "scheme://address" listen string into its scheme and
+// address. It errors unless the string contains exactly one "://" separator.
+func parseDSN(listen string) (dsn, error) {
+	scheme, addr, ok := strings.Cut(listen, "://")
 	if !ok || strings.Contains(addr, "://") {
-		return "", "", errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
+		return dsn{}, errors.New("invalid socket DSN (tcp://:6001, unix://file.sock)")
 	}
-	return scheme, addr, nil
+	return dsn{scheme: scheme, addr: addr}, nil
 }
 
 // Valid returns nil if config is valid.
 func (c *Config) Valid() error {
-	if _, _, err := parseDSN(c.Listen); err != nil {
+	if _, err := parseDSN(c.Listen); err != nil {
 		return err
 	}
 	if c.RequestTimeout < 0 {
@@ -73,10 +79,10 @@ func (c *Config) Listener() (net.Listener, error) {
 
 // Dialer creates rpc socket Dialer.
 func (c *Config) Dialer() (net.Conn, error) {
-	scheme, addr, err := parseDSN(c.Listen)
+	parsed, err := parseDSN(c.Listen)
 	if err != nil {
 		return nil, err
 	}
 	var d net.Dialer
-	return d.DialContext(context.Background(), scheme, addr)
+	return d.DialContext(context.Background(), parsed.scheme, parsed.addr)
 }
