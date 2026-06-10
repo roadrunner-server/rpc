@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -17,25 +18,24 @@ type stubRPCer struct {
 func (s *stubRPCer) Name() string                { return s.name }
 func (s *stubRPCer) RPC() (string, http.Handler) { return s.path, s.h }
 
-func TestBuildMuxSkipsDuplicateAndInvalidPaths(t *testing.T) {
-	first := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+func TestBuildMuxSkipsInvalidPaths(t *testing.T) {
+	ok := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
-	})
-	duplicate := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusTeapot)
 	})
 
 	p := &Plugin{
 		log: slog.New(slog.NewTextHandler(io.Discard, nil)),
 		plugins: map[string]RPCer{
-			"a-first":  &stubRPCer{name: "a-first", path: "/svc/", h: first},
-			"b-second": &stubRPCer{name: "b-second", path: "/svc/", h: duplicate},
-			"empty":    &stubRPCer{name: "empty", path: "", h: first},
-			"no-slash": &stubRPCer{name: "no-slash", path: "bad", h: first},
+			"svc":      &stubRPCer{name: "svc", path: "/svc/", h: ok},
+			"empty":    &stubRPCer{name: "empty", path: "", h: ok},
+			"no-slash": &stubRPCer{name: "no-slash", path: "bad", h: ok},
 		},
 	}
 
-	mux, services := p.buildMux()
+	mux, services, err := p.buildMux()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(services) != 1 || services[0] != "svc" {
 		t.Fatalf("expected exactly one mounted service [svc], got %v", services)
 	}
@@ -43,6 +43,28 @@ func TestBuildMuxSkipsDuplicateAndInvalidPaths(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/svc/", nil))
 	if rec.Code != http.StatusNoContent {
-		t.Fatalf("expected the first plugin in sorted order to own the path, got status %d", rec.Code)
+		t.Fatalf("expected the mounted handler to serve the path, got status %d", rec.Code)
+	}
+}
+
+func TestBuildMuxRejectsDuplicatePaths(t *testing.T) {
+	ok := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	p := &Plugin{
+		log: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		plugins: map[string]RPCer{
+			"a-first":  &stubRPCer{name: "a-first", path: "/svc/", h: ok},
+			"b-second": &stubRPCer{name: "b-second", path: "/svc/", h: ok},
+		},
+	}
+
+	_, _, err := p.buildMux()
+	if err == nil {
+		t.Fatal("expected an error for a duplicate mount path")
+	}
+	if !strings.Contains(err.Error(), "a-first") || !strings.Contains(err.Error(), "b-second") {
+		t.Fatalf("error should name both conflicting plugins, got: %v", err)
 	}
 }

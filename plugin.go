@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	stderrors "errors"
+	"fmt"
 	"log/slog"
 	"maps"
 	"net"
@@ -112,7 +113,11 @@ func (s *Plugin) Serve() chan error {
 	// register the rpc plugin's own API surface alongside discovered plugins
 	s.plugins[PluginName] = s
 
-	mux, services := s.buildMux()
+	mux, services, err := s.buildMux()
+	if err != nil {
+		errCh <- errors.E(op, err)
+		return errCh
+	}
 
 	listener, err := s.cfg.Listener()
 	if err != nil {
@@ -177,10 +182,13 @@ func (s *Plugin) Serve() chan error {
 }
 
 // buildMux mounts every collected plugin handler on a fresh mux and returns it
-// together with the gRPC service names derived from the mount paths. Plugins
-// are mounted in sorted-name order so duplicate-path resolution stays
-// deterministic across restarts.
-func (s *Plugin) buildMux() (*http.ServeMux, []string) {
+// together with the gRPC service names derived from the mount paths. It
+// assumes s.plugins is fully populated (Collects runs before Serve) and does
+// not change during iteration; plugins are mounted in sorted-name order so the
+// result stays deterministic across restarts. A duplicate mount path means the
+// same service is wired twice — a build-time bug — and is returned as an error
+// instead of the http.ServeMux.Handle panic it would otherwise cause.
+func (s *Plugin) buildMux() (*http.ServeMux, []string, error) {
 	mux := http.NewServeMux()
 	mounted := make(map[string]string, len(s.plugins))
 	services := make([]string, 0, len(s.plugins))
@@ -196,11 +204,8 @@ func (s *Plugin) buildMux() (*http.ServeMux, []string) {
 			s.log.Warn("plugin rpc handler path must start with '/'", "plugin", name, "path", path)
 			continue
 		}
-		// http.ServeMux.Handle panics on duplicate patterns.
 		if owner, ok := mounted[path]; ok {
-			s.log.Warn("plugin rpc handler path is already registered, skipping",
-				"plugin", name, "path", path, "registered_by", owner)
-			continue
+			return nil, nil, fmt.Errorf("duplicate rpc handler path %q: registered by both %q and %q", path, owner, name)
 		}
 		mounted[path] = name
 		mux.Handle(path, handler)
@@ -220,7 +225,7 @@ func (s *Plugin) buildMux() (*http.ServeMux, []string) {
 		mux.Handle(rpath, rhandler)
 	}
 
-	return mux, services
+	return mux, services, nil
 }
 
 // Stop stops the service.
