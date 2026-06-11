@@ -191,6 +191,7 @@ func (s *Plugin) Serve() chan error {
 func (s *Plugin) buildMux() (*http.ServeMux, []string, error) {
 	mux := http.NewServeMux()
 	mounted := make(map[string]string, len(s.plugins))
+	seenServices := make(map[string]struct{}, len(s.plugins))
 	services := make([]string, 0, len(s.plugins))
 
 	for _, name := range slices.Sorted(maps.Keys(s.plugins)) {
@@ -211,9 +212,14 @@ func (s *Plugin) buildMux() (*http.ServeMux, []string, error) {
 		mux.Handle(path, handler)
 
 		// derive the gRPC service name from the mount path
-		// (`/<service>/<Method>` or `/<service>/`)
+		// (`/<service>/<Method>` or `/<service>/`); plugins mounting several
+		// per-method handlers under one service must not duplicate the
+		// reflection entry
 		svc, _, _ := strings.Cut(strings.TrimPrefix(path, "/"), "/")
-		services = append(services, svc)
+		if _, ok := seenServices[svc]; !ok {
+			seenServices[svc] = struct{}{}
+			services = append(services, svc)
+		}
 	}
 
 	// gRPC server reflection so operators can list services with grpcurl
