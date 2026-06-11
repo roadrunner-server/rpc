@@ -44,10 +44,15 @@ jobs:
       - name: Install Go dependencies
         run: go mod download
 
+      - name: Run RPC unit tests with coverage
+        run: |
+          mkdir -p ./tests/coverage-ci
+          go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=github.com/roadrunner-server/rpc/v6 -coverprofile=./tests/coverage-ci/rpc_unit.out -covermode=atomic ./
+
       - name: Run RPC e2e tests with coverage
         run: |
           cd tests
-          mkdir ./coverage-ci
+          mkdir -p ./coverage-ci
           go test -timeout 20m -v -race -cover -tags=debug -failfast -coverpkg=github.com/roadrunner-server/rpc/v6 -coverprofile=./coverage-ci/rpc.out -covermode=atomic ./...
 
       - name: Archive code coverage results

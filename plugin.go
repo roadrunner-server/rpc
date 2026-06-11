@@ -5,11 +5,15 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	stderrors "errors"
+	"fmt"
 	"log/slog"
+	"maps"
 	"net"
 	"net/http"
+	"slices"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"connectrpc.com/grpcreflect"
 	"github.com/roadrunner-server/endure/v2/dep"
@@ -109,33 +113,10 @@ func (s *Plugin) Serve() chan error {
 	// register the rpc plugin's own API surface alongside discovered plugins
 	s.plugins[PluginName] = s
 
-	mux := http.NewServeMux()
-	services := make([]string, 0, len(s.plugins))
-	for name, rpcer := range s.plugins {
-		path, handler := rpcer.RPC()
-		if path == "" || handler == nil {
-			s.log.Warn("plugin returned empty rpc handler", "plugin", name)
-			continue
-		}
-		// http.ServeMux.Handle panics on patterns missing a leading slash.
-		if !strings.HasPrefix(path, "/") {
-			s.log.Warn("plugin rpc handler path must start with '/'", "plugin", name, "path", path)
-			continue
-		}
-		mux.Handle(path, handler)
-		// derive the gRPC service name from the mount path
-		// (`/<service>/<Method>` or `/<service>/`)
-		svc, _, _ := strings.Cut(strings.TrimPrefix(path, "/"), "/")
-		services = append(services, svc)
-	}
-
-	// gRPC server reflection so operators can list services with grpcurl
-	if len(services) > 0 {
-		reflector := grpcreflect.NewStaticReflector(services...)
-		rpath, rhandler := grpcreflect.NewHandlerV1(reflector)
-		mux.Handle(rpath, rhandler)
-		rpath, rhandler = grpcreflect.NewHandlerV1Alpha(reflector)
-		mux.Handle(rpath, rhandler)
+	mux, services, err := s.buildMux()
+	if err != nil {
+		errCh <- errors.E(op, err)
+		return errCh
 	}
 
 	listener, err := s.cfg.Listener()
@@ -154,6 +135,10 @@ func (s *Plugin) Serve() chan error {
 		Protocols:         protocols,
 		ReadHeaderTimeout: s.cfg.RequestTimeout,
 		ReadTimeout:       s.cfg.RequestTimeout,
+		// WriteTimeout is deliberately not set: handlers may legitimately block
+		// longer than any fixed limit (e.g. lock waits with a client-chosen wait
+		// TTL), and unary request bodies are already capped by ReadTimeout.
+		IdleTimeout: time.Minute,
 	}
 
 	useTLS := s.cfg.TLS != nil
@@ -194,6 +179,59 @@ func (s *Plugin) Serve() chan error {
 	}()
 
 	return errCh
+}
+
+// buildMux mounts every collected plugin handler on a fresh mux and returns it
+// together with the gRPC service names derived from the mount paths. It
+// assumes s.plugins is fully populated (Collects runs before Serve) and does
+// not change during iteration; plugins are mounted in sorted-name order so the
+// result stays deterministic across restarts. A duplicate mount path means the
+// same service is wired twice — a build-time bug — and is returned as an error
+// instead of the http.ServeMux.Handle panic it would otherwise cause.
+func (s *Plugin) buildMux() (*http.ServeMux, []string, error) {
+	mux := http.NewServeMux()
+	mounted := make(map[string]string, len(s.plugins))
+	seenServices := make(map[string]struct{}, len(s.plugins))
+	services := make([]string, 0, len(s.plugins))
+
+	for _, name := range slices.Sorted(maps.Keys(s.plugins)) {
+		path, handler := s.plugins[name].RPC()
+		if path == "" || handler == nil {
+			s.log.Warn("plugin returned empty rpc handler", "plugin", name)
+			continue
+		}
+		// http.ServeMux.Handle panics on patterns missing a leading slash.
+		if !strings.HasPrefix(path, "/") {
+			s.log.Warn("plugin rpc handler path must start with '/'", "plugin", name, "path", path)
+			continue
+		}
+		if owner, ok := mounted[path]; ok {
+			return nil, nil, fmt.Errorf("duplicate rpc handler path %q: registered by both %q and %q", path, owner, name)
+		}
+		mounted[path] = name
+		mux.Handle(path, handler)
+
+		// derive the gRPC service name from the mount path
+		// (`/<service>/<Method>` or `/<service>/`); plugins mounting several
+		// per-method handlers under one service must not duplicate the
+		// reflection entry
+		svc, _, _ := strings.Cut(strings.TrimPrefix(path, "/"), "/")
+		if _, ok := seenServices[svc]; !ok {
+			seenServices[svc] = struct{}{}
+			services = append(services, svc)
+		}
+	}
+
+	// gRPC server reflection so operators can list services with grpcurl
+	if len(services) > 0 {
+		reflector := grpcreflect.NewStaticReflector(services...)
+		rpath, rhandler := grpcreflect.NewHandlerV1(reflector)
+		mux.Handle(rpath, rhandler)
+		rpath, rhandler = grpcreflect.NewHandlerV1Alpha(reflector)
+		mux.Handle(rpath, rhandler)
+	}
+
+	return mux, services, nil
 }
 
 // Stop stops the service.
