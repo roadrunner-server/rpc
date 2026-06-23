@@ -2,7 +2,7 @@ module github.com/roadrunner-server/rpc/v6
 
 go 1.26
 
-toolchain go1.26.3
+toolchain go1.26.4
 
 require (
 	connectrpc.com/connect v1.20.0
