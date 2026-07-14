@@ -2,7 +2,7 @@ module github.com/roadrunner-server/rpc/v6
 
 go 1.26
 
-toolchain go1.26.0
+toolchain go1.26.4
 
 require (
 	github.com/roadrunner-server/endure/v2 v2.6.2
