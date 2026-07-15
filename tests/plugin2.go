@@ -2,18 +2,19 @@ package rpc
 
 import (
 	"context"
-	"net/http"
+	"net"
+	"net/rpc"
 	"time"
 
-	"connectrpc.com/connect"
 	"github.com/roadrunner-server/errors"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
 )
 
-// Plugin2 makes a call to the plugin1 via Connect-RPC over HTTP/1.1.
-// This simulates an external client; production clients normally use the
-// generated Connect stubs.
-type Plugin2 struct{}
+// Plugin2 makes a call to the plugin1 via RPC
+// this is just a simulation of external call FOR TEST
+// you don't need to do such things :)
+type Plugin2 struct {
+}
 
 func (p2 *Plugin2) Init() error {
 	return nil
@@ -25,24 +26,23 @@ func (p2 *Plugin2) Serve() chan error {
 	go func() {
 		time.Sleep(time.Second * 3)
 
-		client := connect.NewClient[wrapperspb.StringValue, wrapperspb.StringValue](
-			http.DefaultClient,
-			"http://127.0.0.1:6001"+plugin1HelloPath,
-		)
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		resp, err := client.CallUnary(ctx, connect.NewRequest(&wrapperspb.StringValue{Value: "Valery"}))
+		conn, err := net.Dial("tcp", "127.0.0.1:6001")
 		if err != nil {
 			errCh <- errors.E(errors.Serve, err)
 			return
 		}
-		if resp.Msg.GetValue() != "Hello, username: Valery" {
+		client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
+		var ret string
+		err = client.Call("rpc_test.plugin1.Hello", "Valery", &ret)
+		if err != nil {
+			errCh <- err
+			return
+		}
+		if ret != "Hello, username: Valery" {
 			errCh <- errors.E("wrong response")
 			return
 		}
-		// signal end of test
+		// to stop exec
 		errCh <- errors.Str("test error")
 	}()
 
