@@ -163,6 +163,12 @@ func (s *Plugin) Stop(context.Context) error {
 	const op = errors.Op("rpc_plugin_stop")
 	// store closed state
 	atomic.StoreUint32(&s.closed, 1)
+	// Serve may have returned early (e.g. listener creation or Register
+	// failed), or Stop may be called before Serve ran, leaving the listener
+	// unset. Guard against a nil-listener panic and treat it as stopped.
+	if s.listener == nil {
+		return nil
+	}
 	err := s.listener.Close()
 	if err != nil {
 		return errors.E(op, err)
