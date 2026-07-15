@@ -7,7 +7,7 @@ toolchain go1.26.4
 require (
 	github.com/roadrunner-server/endure/v2 v2.6.2
 	github.com/roadrunner-server/errors v1.5.0
-	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.2.0.20260714195909-75e9ece43063
+	github.com/roadrunner-server/goridge/v4 v4.0.0-beta.3
 	github.com/roadrunner-server/tcplisten v1.5.2
 )
 
