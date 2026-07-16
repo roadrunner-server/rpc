@@ -24,7 +24,7 @@ type Plugin struct {
 	// set of the plugins, which are implement RPCer interface and can be plugged into the RR via RPC
 	plugins   map[string]RPCer
 	listener  net.Listener
-	closed    uint32
+	closed    atomic.Uint32
 	rrVersion string
 
 	// whole configuration
@@ -75,7 +75,7 @@ func (s *Plugin) Init(cfg Configurer, log Logger) error {
 	s.log = log.NamedLogger(PluginName)
 
 	// set up state
-	atomic.StoreUint32(&s.closed, 0)
+	s.closed.Store(0)
 
 	// validate config
 	err = s.cfg.Valid()
@@ -142,7 +142,7 @@ func (s *Plugin) Serve() chan error {
 		for {
 			conn, errA := s.listener.Accept()
 			if errA != nil {
-				if atomic.LoadUint32(&s.closed) == 1 {
+				if s.closed.Load() == 1 {
 					// just continue, this is not a critical issue, we just called Stop
 					return
 				}
@@ -162,7 +162,7 @@ func (s *Plugin) Serve() chan error {
 func (s *Plugin) Stop(context.Context) error {
 	const op = errors.Op("rpc_plugin_stop")
 	// store closed state
-	atomic.StoreUint32(&s.closed, 1)
+	s.closed.Store(1)
 	// Serve may have returned early (e.g. listener creation or Register
 	// failed), or Stop may be called before Serve ran, leaving the listener
 	// unset. Guard against a nil-listener panic and treat it as stopped.
