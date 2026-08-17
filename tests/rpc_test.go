@@ -1,171 +1,50 @@
 package rpc
 
 import (
-	"log/slog"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
 	"testing"
-	"time"
 
-	"github.com/roadrunner-server/config/v6"
-	"github.com/roadrunner-server/endure/v2"
-	"github.com/roadrunner-server/errors"
-	"github.com/roadrunner-server/logger/v6"
+	"tests/helpers"
+
 	"github.com/roadrunner-server/rpc/v6"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestRpcInit(t *testing.T) {
-	cont := endure.New(slog.LevelDebug)
+const rpcAddr = "127.0.0.1:6001"
 
-	err := cont.Register(&Plugin1{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = cont.Register(&Plugin2{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	v := &config.Plugin{
-		Version: "v2024.2.0",
-		Path:    "configs/.rr.yaml",
-	}
-
-	err = cont.Register(v)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = cont.Register(&rpc.Plugin{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = cont.Register(&logger.Plugin{})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = cont.Init()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ch, err := cont.Serve()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	sig := make(chan os.Signal, 1)
-
-	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	tt := time.NewTimer(time.Second * 3)
-
-	go func() {
-		defer wg.Done()
-		defer tt.Stop()
-		for {
-			select {
-			case e := <-ch:
-				// just stop, this is ok
-				assert.Error(t, e.Error)
-				_ = cont.Stop()
-			case <-sig:
-				err = cont.Stop()
-				if err != nil {
-					assert.FailNow(t, "error", err.Error())
-				}
-				return
-			case <-tt.C:
-				return
-			}
-		}
-	}()
-
-	wg.Wait()
+func rpcPlugins() []any {
+	return []any{&rpc.Plugin{}, &Plugin1{}}
 }
 
-func TestRpcDisabled(t *testing.T) {
-	cont := endure.New(slog.LevelDebug)
+// TestServesRegisteredPlugin dials the listener and calls the method Plugin1
+// exposes through RPC(), so the assertion covers the whole path: the plugin was
+// collected, its receiver was registered under its Name(), and goridge encoded
+// the round trip.
+func TestServesRegisteredPlugin(t *testing.T) {
+	helpers.Start(t, "configs/.rr.yaml", rpcPlugins(), helpers.WithTCPProbe(rpcAddr))
 
-	err := cont.Register(&Plugin1{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	client := helpers.NewRPCClient(t, rpcAddr)
 
-	err = cont.Register(&Plugin2{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	var got string
+	require.NoError(t, client.Call("rpc_test.plugin1.Hello", "Valery", &got))
 
-	v := &config.Plugin{}
-	v.Path = "configs/.rr-rpc-disabled.yaml"
-	v.Prefix = "rr"
-	err = cont.Register(v)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.Equal(t, "Hello, username: Valery", got)
+}
 
-	err = cont.Register(&rpc.Plugin{})
-	if err != nil {
-		t.Fatal(err)
-	}
+// TestUnknownMethodIsRejected proves the dispatcher does not silently accept a
+// method nobody registered.
+func TestUnknownMethodIsRejected(t *testing.T) {
+	helpers.Start(t, "configs/.rr.yaml", rpcPlugins(), helpers.WithTCPProbe(rpcAddr))
 
-	err = cont.Register(&logger.Plugin{})
-	if err != nil {
-		t.Fatal(err)
-	}
+	client := helpers.NewRPCClient(t, rpcAddr)
 
-	err = cont.Init()
-	if err != nil {
-		t.Fatal(err)
-	}
+	var got string
+	err := client.Call("rpc_test.plugin1.NoSuchMethod", "Valery", &got)
 
-	ch, err := cont.Serve()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.Error(t, err)
+}
 
-	sig := make(chan os.Signal, 1)
-
-	signal.Notify(sig, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	tt := time.NewTimer(time.Second * 20)
-
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
-		defer tt.Stop()
-		for {
-			select {
-			case e := <-ch:
-				// RPC is turned off, should be and dial error
-				if errors.Is(errors.Disabled, e.Error) {
-					assert.FailNow(t, "should not be disabled error")
-				}
-				assert.Error(t, e.Error)
-				assert.NoError(t, cont.Stop())
-				return
-			case <-sig:
-				err = cont.Stop()
-				if err != nil {
-					assert.FailNow(t, "error", err.Error())
-				}
-				return
-			case <-tt.C:
-				// timeout
-				return
-			}
-		}
-	}()
-
-	wg.Wait()
+// TestDisabledWithoutRPCSection covers the config with no rpc block: the plugin
+// reports Disabled, so the container still starts but nothing binds the port.
+func TestDisabledWithoutRPCSection(t *testing.T) {
+	helpers.StartExpectNoListener(t, "configs/.rr-rpc-disabled.yaml", rpcPlugins(), rpcAddr)
 }
