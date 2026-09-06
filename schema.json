@@ -14,6 +14,9 @@
       "examples": [
         "tcp://127.0.0.1:6001"
       ]
+    },
+    "unix_socket": {
+      "$ref": "https://raw.githubusercontent.com/roadrunner-server/tcplisten/v1.6.0/schema.json"
     }
   }
 }
