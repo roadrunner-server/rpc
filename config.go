@@ -4,10 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math"
 	"net"
-	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/roadrunner-server/tcplisten"
@@ -68,37 +65,4 @@ func (c *Config) Dialer() (net.Conn, error) {
 	}
 	var d net.Dialer
 	return d.DialContext(context.Background(), parsed.scheme, parsed.addr)
-}
-
-// validateUnixSocketIDs rejects values that weak decoding can convert to valid IDs.
-func validateUnixSocketIDs(cfg Configurer) error {
-	const key = PluginName + ".unix_socket"
-	var options map[string]any
-	if err := cfg.UnmarshalKey(key, &options); err != nil {
-		return fmt.Errorf("%s: %w", key, err)
-	}
-	for _, field := range []string{"uid", "gid"} {
-		if options[field] == nil {
-			continue
-		}
-		value := reflect.ValueOf(options[field])
-		valid := false
-		switch {
-		case value.CanInt():
-			id := value.Int()
-			valid = id >= 0 && id < math.MaxUint32
-		case value.CanUint():
-			valid = value.Uint() < math.MaxUint32
-		case value.Kind() == reflect.String:
-			id, err := strconv.ParseInt(value.String(), 0, strconv.IntSize)
-			valid = err == nil && id >= 0 && id < math.MaxUint32
-		case value.CanFloat():
-			id := value.Float()
-			valid = id >= 0 && id < math.MaxUint32 && math.Trunc(id) == id
-		}
-		if !valid {
-			return fmt.Errorf("%s.%s: must be an integer between 0 and 4294967294", key, field)
-		}
-	}
-	return nil
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/roadrunner-server/endure/v2/dep"
 	"github.com/roadrunner-server/errors"
 	goridgeRpc "github.com/roadrunner-server/goridge/v4/pkg/rpc"
-	"github.com/roadrunner-server/tcplisten"
 )
 
 // PluginName contains default plugin name.
@@ -62,20 +61,10 @@ func (s *Plugin) Init(cfg Configurer, log Logger) error {
 	if !cfg.Has(PluginName) {
 		return errors.E(op, errors.Disabled)
 	}
-	hasUnixSocket := cfg.Has(PluginName + ".unix_socket")
-	if hasUnixSocket {
-		if err := validateUnixSocketIDs(cfg); err != nil {
-			return errors.E(op, err)
-		}
-	}
 
 	err := cfg.UnmarshalKey(PluginName, &s.cfg)
 	if err != nil {
 		return errors.E(op, errors.Disabled, err)
-	}
-	// Viper can omit an empty map from the decoded section.
-	if hasUnixSocket && s.cfg.UnixSocket == nil {
-		s.cfg.UnixSocket = &tcplisten.UnixSocketOptions{}
 	}
 
 	// Init defaults

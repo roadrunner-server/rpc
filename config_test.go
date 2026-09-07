@@ -209,8 +209,10 @@ func TestInitDefaults(t *testing.T) {
 	blank := &Config{}
 	blank.InitDefaults()
 	assert.Equal(t, "tcp://127.0.0.1:6001", blank.Listen)
+	assert.Nil(t, blank.UnixSocket)
 
 	custom := &Config{Listen: "unix://custom.sock"}
 	custom.InitDefaults()
 	assert.Equal(t, "unix://custom.sock", custom.Listen)
+	assert.Nil(t, custom.UnixSocket)
 }
