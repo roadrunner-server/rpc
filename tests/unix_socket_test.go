@@ -165,6 +165,7 @@ func TestUnixSocketOwnershipError(t *testing.T) {
 
 func unixSocketConfig(t *testing.T, listen, options string, flags []string) *config.Plugin {
 	t.Helper()
+
 	contents := fmt.Sprintf(`version: "3"
 rpc:
   listen: %q
