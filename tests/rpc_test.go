@@ -22,7 +22,7 @@ func rpcPlugins() []any {
 func TestServesRegisteredPlugin(t *testing.T) {
 	helpers.Start(t, "configs/.rr.yaml", rpcPlugins(), helpers.WithTCPProbe(rpcAddr))
 
-	client := helpers.NewRPCClient(t, rpcAddr)
+	client := helpers.NewRPCClient(t, "tcp", rpcAddr)
 
 	var got string
 	require.NoError(t, client.Call("rpc_test.plugin1.Hello", "Valery", &got))
@@ -35,7 +35,7 @@ func TestServesRegisteredPlugin(t *testing.T) {
 func TestUnknownMethodIsRejected(t *testing.T) {
 	helpers.Start(t, "configs/.rr.yaml", rpcPlugins(), helpers.WithTCPProbe(rpcAddr))
 
-	client := helpers.NewRPCClient(t, rpcAddr)
+	client := helpers.NewRPCClient(t, "tcp", rpcAddr)
 
 	var got string
 	err := client.Call("rpc_test.plugin1.NoSuchMethod", "Valery", &got)

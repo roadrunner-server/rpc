@@ -28,6 +28,7 @@ const (
 // bootCfg holds the options applied to a container before it is started.
 type bootCfg struct {
 	version  string
+	flags    []string
 	logLevel slog.Level
 	probe    func(ctx context.Context) bool
 }
@@ -38,6 +39,11 @@ type Option func(*bootCfg)
 // WithConfigVersion overrides the config schema version.
 func WithConfigVersion(v string) Option {
 	return func(b *bootCfg) { b.version = v }
+}
+
+// WithConfigFlags applies configuration overrides.
+func WithConfigFlags(flags ...string) Option {
+	return func(b *bootCfg) { b.flags = flags }
 }
 
 // WithLogLevel sets the endure container log level (debug by default).
@@ -132,10 +138,10 @@ func StartExpectNoListener(t *testing.T, cfgPath string, plugins []any, addr str
 }
 
 // NewRPCClient dials the goridge rpc listener and closes the client on cleanup.
-func NewRPCClient(t *testing.T, address string) *rpc.Client {
+func NewRPCClient(t *testing.T, network, address string) *rpc.Client {
 	t.Helper()
 
-	conn, err := new(net.Dialer).DialContext(t.Context(), "tcp", address)
+	conn, err := new(net.Dialer).DialContext(t.Context(), network, address)
 	require.NoError(t, err)
 
 	client := rpc.NewClientWithCodec(goridgeRpc.NewClientCodec(conn))
@@ -156,7 +162,7 @@ func newContainer(t *testing.T, cfgPath string, plugins []any, opts []Option) (*
 
 	all := make([]any, 0, 2+len(plugins))
 	all = append(all,
-		&config.Plugin{Version: bc.version, Path: cfgPath},
+		&config.Plugin{Version: bc.version, Path: cfgPath, Flags: bc.flags},
 		&logger.Plugin{},
 	)
 
