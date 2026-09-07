@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"strings"
 
@@ -12,7 +13,8 @@ import (
 // Config defines RPC service config.
 type Config struct {
 	// Listen - address string (tcp://host:port or unix://file.sock).
-	Listen string `mapstructure:"listen"`
+	Listen     string                       `mapstructure:"listen"`
+	UnixSocket *tcplisten.UnixSocketOptions `mapstructure:"unix_socket"`
 }
 
 // InitDefaults allows init blank config with a pre-defined set of default values.
@@ -41,12 +43,18 @@ func parseDSN(listen string) (dsn, error) {
 // Valid returns nil if config is valid.
 func (c *Config) Valid() error {
 	_, err := parseDSN(c.Listen)
-	return err
+	if err != nil {
+		return err
+	}
+	if err = c.UnixSocket.Validate(c.Listen); err != nil {
+		return fmt.Errorf("rpc.unix_socket: %w", err)
+	}
+	return nil
 }
 
 // Listener creates new rpc socket Listener.
 func (c *Config) Listener() (net.Listener, error) {
-	return tcplisten.CreateListener(c.Listen)
+	return tcplisten.CreateListenerWithOptions(c.Listen, c.UnixSocket)
 }
 
 // Dialer creates rpc socket Dialer.
