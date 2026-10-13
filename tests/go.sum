@@ -20,8 +20,8 @@ github.com/mattn/go-isatty v0.0.24 h1:tGZZoVgT/KiqK1c8ocVLeDS8BSWMRd47J3Lbz7vsRe
 github.com/mattn/go-isatty v0.0.24/go.mod h1:nMCL3Zebbrt45jsMDgnfIwz6ydEQApk5oEI3HqDio6A=
 github.com/pelletier/go-toml/v2 v2.4.3 h1:GTRvJQutkOSftxIFD5xw9aepkYNuPWmVJpffdDPYVpY=
 github.com/pelletier/go-toml/v2 v2.4.3/go.mod h1:2gIqNv+qfxSVS7cM2xJQKtLSTLUE9V8t9Stt+h56mCY=
-github.com/roadrunner-server/config/v6 v6.0.0-beta.4 h1:C7cNPb441g7Uwo4nN0Ug7RZrwiFfx+UU7brFxVLBU50=
-github.com/roadrunner-server/config/v6 v6.0.0-beta.4/go.mod h1:MyM08rnnUBqmozeJ1SqFO0l2iu5nQTPKod4OLajarow=
+github.com/roadrunner-server/config/v6 v6.0.0 h1:FVzmzbv/+J4R3qKdCPl05I+Z+rWjP+Xtyks1Xo2l264=
+github.com/roadrunner-server/config/v6 v6.0.0/go.mod h1:F/IKcGSjsWfmMxqju/VACg5rqhJK7nWsJ4QG5pMZEhw=
 github.com/roadrunner-server/endure/v2 v2.7.0 h1:HgWUXI3D3mGv8SJFA1mE9uEGdVmVVKGsexgsIkArd/c=
 github.com/roadrunner-server/endure/v2 v2.7.0/go.mod h1:6+QFmFt9MsBsInkrahKlIp/SDh7GYXEVQGFVnfo1efA=
 github.com/roadrunner-server/errors v1.6.0 h1:0GJfuvv/gYnUckPyNHwDMsu+mGJKnI2yGav6tsSJABQ=
