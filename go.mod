@@ -2,7 +2,7 @@ module github.com/roadrunner-server/rpc/v6
 
 go 1.27
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	github.com/roadrunner-server/endure/v2 v2.7.0
@@ -18,6 +18,6 @@ exclude (
 )
 
 require (
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
