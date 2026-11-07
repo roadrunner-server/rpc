@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"log/slog"
 	"net"
 	"net/rpc"
